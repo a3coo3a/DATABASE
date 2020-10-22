@@ -1,3 +1,5 @@
+SET SERVEROUTPUT ON;
+
 -- 프로시저 생성
 -- in : 외부의 입력받는 파라미터
 /* 함수랑 비슷해 보이지만 함수는 따로 있어요~
@@ -163,19 +165,15 @@ IS
     v_count NUMBER := 0;
     v_salary_sum employees.salary%type := 0;
 BEGIN
-    SELECT COUNT(*)
-    INTO v_count
+    SELECT COUNT(*),SUM(salary)
+    INTO v_count, v_salary_sum
     FROM employees
     WHERE job_id = p_job_id;
     
     IF v_count > 0 THEN
-        SELECT SUM(salary)
-        INTO v_salary_sum
-        FROM employees
-        WHERE job_id = p_job_id;
-        dbms_output.put_line(v_salary_sum);
+        DBMS_OUTPUT.PUT_LINE(v_salary_sum);
     ELSE
-        dbms_output.put_line('job_id: "'||P_JOB_ID||'" 가 없습니다');
+        DBMS_OUTPUT.PUT_LINE('job_id: "'||P_JOB_ID||'" 가 없습니다');
     END IF;
 END;
 
@@ -183,11 +181,50 @@ select * from EMPLOYEES;
 EXECUTE emp_proc('AD_V');
 
 SELECT COUNT(*)
- 
+FROM employees
+WHERE job_id = 'AD_VP';
+     
+SELECT SUM(salary)
+FROM employees
+WHERE job_id = 'AD_VP';
+
+-- return키워드
+-- 프로시저의 종료
+CREATE OR REPLACE PROCEDURE emp_proc(
+    p_job_id IN employees.job_id%TYPE
+)
+IS
+    v_count NUMBER := 0;
+    v_salary_sum employees.salary%type := 0;
+BEGIN
+    SELECT COUNT(*),SUM(salary)
+    INTO v_count, v_salary_sum
     FROM employees
-    WHERE job_id = 'AD_VP';
-       
-       SELECT SUM(salary)
-       
-        FROM employees
-        WHERE job_id = 'AD_VP';
+    WHERE job_id like '%' || p_job_id || '%';   -- 입력한 값이 포함되어 있으면,
+    
+    IF v_count > 0 THEN
+        DBMS_OUTPUT.PUT_LINE(v_salary_sum);
+        return; -- 프로시저의 종료 // 반환이 아님.
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('job_id: "'||P_JOB_ID||'" 가 없습니다');
+    END IF;
+END;
+
+
+-- 예외처리
+-- EXCEPTION WHEN OTHERS THEN
+DECLARE
+    v_num number := 0;
+begin
+    v_num := 10/0;
+    
+    EXCEPTION WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('0으로 나눌 수 없습니다.');
+end;    
+-- 결과 : 0으로 나눌 수 없습니다.
+
+
+-- 프로시저 삭제
+drop procedure new_job_proc;
+drop PROCEDURE new_job_proc02;
+
