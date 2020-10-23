@@ -244,11 +244,13 @@ BEGIN
                    A.job_id = p_emp_job_id
     WHEN NOT MATCHED THEN
         INSERT (employee_id, last_name, email, hire_date, job_id) 
-        VALUES(p_emp_id,
+        VALUES(p_emp_id, 
                p_emp_last_name,
                p_emp_email,
                p_emp_hire_date,
                p_emp_job_id);
+    
+    commit;
     
 END;
 
@@ -273,12 +275,12 @@ create table day_of_sales(   -- 마감시 오늘일자 총매출 기록
     regdate date,
     final_total number(10)
 );
-
+set serveroutput on;
 create or REPLACE PROCEDURE salesProc(
     p_date in date
 )
 is
-    v_total number;
+    v_total number := 0;
 begin
     select sum(price)
     into v_total
